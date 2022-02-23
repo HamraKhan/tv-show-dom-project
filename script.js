@@ -84,4 +84,28 @@ function search() {
   }
 } 
 
+function selectInputDropdownList() {
+  const dropdownList = document.createElement("select");
+  dropdownList.name = "episodes";
+  dropdownList.setAttribute("id", "dropdown-episode");
+  const bodyElement = document.getElementsByTagName("body")[0];
+  bodyElement.insertBefore(dropdownList, bodyElement.children[0]);
+ 
+
+  const allEpisodes = getAllEpisodes();
+  allEpisodes.forEach((episode) => {
+    const dropdownOption = document.createElement("option");
+    dropdownOption.value = "episode";
+
+    dropdownOption.innerHTML = `S${formatNumber(episode.season)}E${formatNumber(
+      episode.number
+    )} - ${episode.name}`;
+
+    dropdownList.appendChild(dropdownOption);
+  });
+}
+selectInputDropdownList();
+
+
+
 window.onload = setup;
