@@ -55,15 +55,33 @@ function makePageForEpisodes(episodeList) {
   episodeList.forEach(episode => {
     
     const tvEpisodeDiv = createTVEpisodeDiv();
-
     createEpisodeTitle(tvEpisodeDiv, episode);
-
     createEpisodeImage(tvEpisodeDiv, episode);
-   
     createEpisodeDescription(tvEpisodeDiv, episode);
 
     rootElem.appendChild(tvEpisodeDiv);
   });
 }
+
+function search() {
+  const input = document.getElementById("search");
+  const filter = input.value.toLowerCase();
+  const rootElem = document.getElementById("root");
+
+  const allEpisodes = getAllEpisodes();
+  
+  const filteredEpisodes = allEpisodes.filter(
+    (episode) =>
+      episode.name.toLowerCase().includes(filter) ||
+      episode.summary.toLowerCase().includes(filter)
+  );
+
+  rootElem.innerHTML = "";
+  if (input.length === 0) {
+    makePageForEpisodes(allEpisodes);
+  } else {
+    makePageForEpisodes(filteredEpisodes);
+  }
+} 
 
 window.onload = setup;
