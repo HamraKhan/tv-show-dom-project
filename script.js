@@ -94,12 +94,11 @@ function search() {
 //The select input should list all episodes in the format: "S01E01 - Winter is Coming"
 function selectInputDropdownList() {
   const dropdownList = document.createElement("select");
-  const bodyElement = document.getElementsByTagName("body")[0];
+  const headerEl = document.getElementsByTagName('header');
   const allEpisodes = getAllEpisodes();
     
   dropdownList.setAttribute("id", "dropdownEpisode");
-
-  bodyElement.insertBefore(dropdownList, bodyElement.children[0]);
+  headerEl[0].appendChild(dropdownList);
  
   allEpisodes.forEach((episode) => {
     const dropdownOption = document.createElement("option");

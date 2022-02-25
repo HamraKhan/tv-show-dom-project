@@ -1,3 +1,50 @@
+:root {
+  --bg-color: #1f1d1d;
+  --white: #ffffff;
+  --grey-blue: #1f262c;
+  font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+  --title-font-size: 20px;
+  --description-font-size: 11.5px;
+}
+
+body {
+  background-color: var(--bg-color);
+}
+
+header {
+  padding-top: 20px;
+}
+
+select {
+  margin-bottom: 20px;
+}
+
+input {
+  margin-left: 20px;
+}
+
 #root {
-  color: red;
+  background-color: #041529;
+  color: var(--white);
+  display: grid;
+  grid-template-columns: 250px 250px 250px 250px;
+  grid-gap: 5vw;
+  padding-top: 50px;
+}
+
+h1 {
+  color: var(--white);
+  font-size: var(--title-font-size);
+}
+
+p {
+  color: var(--white);
+  font-size: var(--description-font-size);
+  line-height: 16px;
+  padding: 16px;
+}
+
+.tv-episode {
+  background-color: var(--grey-blue);
+  margin-top: 54px;
 }
