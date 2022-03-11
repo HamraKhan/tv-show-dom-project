@@ -1,8 +1,14 @@
-//You can edit ALL of the code here
-function setup() {
-  const allEpisodes = getAllEpisodes();
+let allEpisodes;
+let allShows;
+
+async function setup() {
+  allEpisodes = await getAllEpisodesFromApi();
+  allShows = getAllShows().sort((showA, showB) => {
+    return showA.name.localeCompare(showB.name);
+  });
   makePageForEpisodes(allEpisodes);
-  selectInputDropdownList();
+  showDropdownListOptions();
+  episodeDropdownListOptions();
 }
 
 //prepend a 0 to single digit numbers to display season/episode
@@ -25,9 +31,7 @@ function createEpisodeTitle(tvEpisodeDiv, episode) {
   const episodeTitle = document.createElement("h1");
   episodeTitle.classList.add("episode-title");
 
-  episodeTitle.innerHTML = `${episode.name} - S${formatNumber(
-    episode.season
-  )}E${formatNumber(episode.number)}`;
+  episodeTitle.innerHTML = `${episode.name} - ${generateEpisodeCode(episode)}`;
 
   tvEpisodeDiv.appendChild(episodeTitle);
 }
@@ -54,13 +58,11 @@ function createEpisodeDescription(tvEpisodeDiv, episode) {
   tvEpisodeDiv.appendChild(descDiv);
 }
 
-
-function makePageForEpisodes(episodeList) {
+function makePageForEpisodes(allEpisodes) {
   const rootElem = document.getElementById("root");
-  rootElem.textContent = `Got ${episodeList.length} episode(s)`;
+  rootElem.textContent = `Got ${allEpisodes.length} episode(s)`;
 
-  episodeList.forEach(episode => {
-    
+  allEpisodes.forEach((episode) => {
     const tvEpisodeDiv = createTVEpisodeDiv();
     createEpisodeTitle(tvEpisodeDiv, episode);
     createEpisodeImage(tvEpisodeDiv, episode);
@@ -76,8 +78,6 @@ function search() {
   const filter = input.value.toLowerCase();
   const rootElem = document.getElementById("root");
 
-  const allEpisodes = getAllEpisodes();
-  
   const filteredEpisodes = allEpisodes.filter(
     (episode) =>
       episode.name.toLowerCase().includes(filter) ||
@@ -86,51 +86,96 @@ function search() {
 
   rootElem.innerHTML = "";
   if (input.length === 0) {
-    makePageForEpisodes(allEpisodes);
+    makePageForEpisodes();
   } else {
     makePageForEpisodes(filteredEpisodes);
   }
-} 
+}
 
 //The select input should list all episodes in the format: "S01E01 - Winter is Coming"
-function selectInputDropdownList() {
-  const dropdownList = document.createElement("select");
-  const headerEl = document.getElementsByTagName('header');
-  const allEpisodes = getAllEpisodes();
-    
-  dropdownList.setAttribute("id", "dropdownEpisode");
-  headerEl[0].appendChild(dropdownList);
- 
+function episodeDropdownListOptions() {
+  const episodeDropdownListEl = document.getElementById("episodesDropdownList");
+  episodeDropdownListEl.innerHTML = "";
+  const dropdownOption = document.createElement("option");
+  dropdownOption.value = `showAll`;
+  dropdownOption.innerHTML = `Show All Episodes`;
+  episodeDropdownListEl.appendChild(dropdownOption);
+
   allEpisodes.forEach((episode) => {
     const dropdownOption = document.createElement("option");
-    dropdownOption.value = `S${formatNumber(episode.season)}E${formatNumber(
-      episode.number
-    )}`;
-    dropdownOption.innerHTML = `S${formatNumber(episode.season)}E${formatNumber(
-      episode.number
-    )} - ${episode.name}`;
-    dropdownList.appendChild(dropdownOption);
+    dropdownOption.value = `${generateEpisodeCode(episode)}`;
+    dropdownOption.innerHTML = `${generateEpisodeCode(episode)} - ${
+      episode.name
+    }`;
+    episodeDropdownListEl.appendChild(dropdownOption);
   });
 
-  dropdownList.addEventListener("change", () => onEpisodeSelect());
+  episodeDropdownListEl.addEventListener("change", () => onEpisodeSelect());
 }
 
 // user makes a selection, they should be taken directly to that episode in the list
 function onEpisodeSelect() {
-  const selectedCode = document.getElementById("dropdownEpisode").value;
+  const selectedCode = document.getElementById("episodesDropdownList").value;
 
   const rootElem = document.getElementById("root");
-
-  const allEpisodes = getAllEpisodes();
-
-  const filteredEpisode = allEpisodes.filter((episode) => {
-      const episodeCode = `S${formatNumber(episode.season)}E${formatNumber(episode.number)}`;
-      return (episodeCode === selectedCode);
-    }
-  );
+  let filteredEpisode = []; 
+  if(selectedCode === 'showAll') {
+    filteredEpisode = allEpisodes;
+  } else {
+    filteredEpisode = allEpisodes.filter((episode) => {
+      const episodeCode = generateEpisodeCode(episode);
+      return episodeCode === selectedCode;
+    });
+  }
 
   rootElem.innerHTML = "";
   makePageForEpisodes(filteredEpisode);
 }
+
+function generateEpisodeCode(episode) {
+  return `S${formatNumber(episode.season)}E${formatNumber(episode.number)}`;
+}
+
+function getAllEpisodesFromApi() {
+  return fetch("https://api.tvmaze.com/shows/82/episodes")
+    .then(
+      (response) => {
+      return response.json();
+   }).then(
+      (episodes) => {
+     return episodes;
+   });
+}
+
+function showDropdownListOptions() {
+  const showDropdownListEl = document.getElementById("showsDropdownList");
+
+  allShows.forEach((show) => {
+    const dropdownOption = document.createElement("option");
+    dropdownOption.value = show.id;
+    dropdownOption.innerHTML = show.name;
+    showDropdownListEl.appendChild(dropdownOption);
+  });
+
+  showDropdownListEl.addEventListener("change", () => onShowSelect());
+}
+
+// user makes a selection, they should be taken directly to that show in the list
+function onShowSelect() {
+  const selectedShowId = document.getElementById("showsDropdownList").value;
+  fetch(`https://api.tvmaze.com/shows/${selectedShowId}/episodes`)
+  .then((response) => {
+    return response.json();
+  }).then((episodes) => {
+    const rootElem = document.getElementById("root");
+    const searchInput = document.getElementById("search");
+    rootElem.innerHTML = "";
+    searchInput.value = "";
+    allEpisodes = episodes;
+    makePageForEpisodes(episodes);
+    
+    episodeDropdownListOptions();
+  })
+} 
 
 window.onload = setup;
