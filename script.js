@@ -54,6 +54,7 @@ function createEpisodeDescription(tvEpisodeDiv, episode) {
   tvEpisodeDiv.appendChild(descDiv);
 }
 
+
 function makePageForEpisodes(episodeList) {
   const rootElem = document.getElementById("root");
   rootElem.textContent = `Got ${episodeList.length} episode(s)`;
