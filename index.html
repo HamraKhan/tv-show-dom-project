@@ -10,7 +10,10 @@
 
   <body>
     <header>
-      <input type="text" id="search" onkeyup="search()">
+      <select id="showsDropdownList"></select>
+      <select id="episodesDropdownList"></select>
+      <input type="text" id="search" placeholder="your search term..." onkeyup="search()">
+
     </header>
     
     <div id="root">
@@ -18,7 +21,7 @@
 
     <!-- Loads a provided function called getAllEpisodes() which returns all episodes -->
     <script src="episodes.js"></script>
-
+    <script src="shows.js"></script>
     <!-- Loads YOUR javascript code -->
     <script src="script.js"></script>
   </body>
