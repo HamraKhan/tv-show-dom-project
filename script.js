@@ -6,9 +6,15 @@ async function setup() {
   allShows = getAllShows().sort((showA, showB) => {
     return showA.name.localeCompare(showB.name);
   });
-  makePageForEpisodes(allEpisodes);
   showDropdownListOptions();
   episodeDropdownListOptions();
+  selectGameOfThronesShowByDefault();
+  makePageForEpisodes(allEpisodes);
+}
+
+function selectGameOfThronesShowByDefault() {
+  const showDropdownListEl = document.getElementById("showsDropdownList");
+  showDropdownListEl.value = 82
 }
 
 //prepend a 0 to single digit numbers to display season/episode
@@ -65,8 +71,16 @@ function makePageForEpisodes(allEpisodes) {
   allEpisodes.forEach((episode) => {
     const tvEpisodeDiv = createTVEpisodeDiv();
     createEpisodeTitle(tvEpisodeDiv, episode);
-    createEpisodeImage(tvEpisodeDiv, episode);
-    createEpisodeDescription(tvEpisodeDiv, episode);
+
+    //check if medium property is present
+    if (episode?.image?.medium != undefined) {
+      createEpisodeImage(tvEpisodeDiv, episode);
+    }
+
+    //check if summary property is present
+    if (episode.summary != undefined) {
+      createEpisodeDescription(tvEpisodeDiv, episode);
+    }
 
     rootElem.appendChild(tvEpisodeDiv);
   });
@@ -80,8 +94,8 @@ function search() {
 
   const filteredEpisodes = allEpisodes.filter(
     (episode) =>
-      episode.name.toLowerCase().includes(filter) ||
-      episode.summary.toLowerCase().includes(filter)
+      episode.name.toLowerCase().includes(filter) || 
+      episode.summary?.toLowerCase().includes(filter)
   );
 
   rootElem.innerHTML = "";
