@@ -7,16 +7,11 @@ async function setup() {
     return showA.name.localeCompare(showB.name);
   });
   showDropdownListOptions();
-  episodeDropdownListOptions();
-  // selectGameOfThronesShowByDefault();
-  // makePageForEpisodes(allEpisodes);
-  makePageForShows(allShows);
+  makePageForShows();
+  episodeDropdownListInitState();
 }
 
-function selectGameOfThronesShowByDefault() {
-  const showDropdownListEl = document.getElementById("showsDropdownList");
-  showDropdownListEl.value = 82;
-}
+// --------------------TV SHOW EPISODES------------------------------
 
 //prepend a 0 to single digit numbers to display season/episode
 function formatNumber(episodeNumber) {
@@ -26,9 +21,12 @@ function formatNumber(episodeNumber) {
   });
 }
 
-// --------------------TV SHOW EPISODES------------------------------
+//generate episode code
+function generateEpisodeCode(episode) {
+  return `S${formatNumber(episode.season)}E${formatNumber(episode.number)}`;
+}
 
-//create episode div el
+//create episode div
 function createTVEpisodeDiv() {
   const tvEpisode = document.createElement("div");
   tvEpisode.classList.add("tv-episode");
@@ -48,7 +46,7 @@ function createEpisodeTitle(tvEpisodeDiv, episode) {
 //create episode div with episode img tag as child
 function createEpisodeImage(tvEpisodeDiv, episode) {
   const imgDiv = document.createElement("div");
-  imgDiv.classList.add("img-div");
+  imgDiv.classList.add("episode-img-div");
 
   const image = document.createElement("img");
   image.src = episode.image.medium;
@@ -69,7 +67,8 @@ function createEpisodeDescription(tvEpisodeDiv, episode) {
 
 function makePageForEpisodes(allEpisodes) {
   const rootElem = document.getElementById("root");
-  rootElem.textContent = `Got ${allEpisodes.length} episode(s)`;
+  const episodeCounter = document.getElementById("showsAndEpisodesCounter");
+  episodeCounter.textContent = `Got ${allEpisodes.length} episode(s)`;
 
   allEpisodes.forEach((episode) => {
     const tvEpisodeDiv = createTVEpisodeDiv();
@@ -89,7 +88,7 @@ function makePageForEpisodes(allEpisodes) {
   });
 }
 
-// --------------------------------TV SHOW-----------------------------------
+// --------------------------------TV SHOWS -----------------------------------
 
 //create show div el
 function createTVShowDiv() {
@@ -111,7 +110,7 @@ function createShowTitle(tvShowDiv, show) {
 //create show div with show img tag as child
 function createShowImage(tvShowDiv, show) {
   const showImgDiv = document.createElement("div");
-  showImgDiv.classList.add("img-div");
+  showImgDiv.classList.add("show-img-div");
 
   const showImage = document.createElement("img");
   showImage.src = show.image.medium;
@@ -170,9 +169,10 @@ function createShowRuntime(tvShowDiv, show) {
 }
 
 // present a listing of all shows displaying name, image, summary, genres, status, rating, and runtime
-function makePageForShows(allShows) {
+function makePageForShows() {
   const rootElem = document.getElementById("root");
-  rootElem.textContent = `Got ${allShows.length} show(s)`;
+  const showCounter = document.getElementById("showsAndEpisodesCounter");
+  showCounter.textContent = `Got ${allShows.length} show(s)`;
 
   allShows.forEach((show) => {
     const tvShowDiv = createTVShowDiv();
@@ -199,7 +199,7 @@ function makePageForShows(allShows) {
     }
 
     //check if rating property is present
-    if (show.rating.average != undefined) {
+    if (show.rating?.average != undefined) {
       createShowRating(tvShowDiv, show);
     }
 
@@ -212,7 +212,7 @@ function makePageForShows(allShows) {
   });
 }
 
-//------------------------------ SEARCH INPUT-----------
+//------------------------------ SEARCH INPUT EPISODES ----------------------
 //Add live search input
 function search() {
   const input = document.getElementById("search");
@@ -227,20 +227,25 @@ function search() {
 
   rootElem.innerHTML = "";
   if (input.length === 0) {
-    makePageForEpisodes();
-  } else {
-    makePageForEpisodes(filteredEpisodes);
-  }
+    makePageForShows();
+  } 
 }
 
-//The select input should list all episodes in the format: "S01E01 - Winter is Coming"
-function episodeDropdownListOptions() {
+//------------------------------ EPISODE DROPDOWN BAR ----------------------
+
+function episodeDropdownListInitState() {
   const episodeDropdownListEl = document.getElementById("episodesDropdownList");
   episodeDropdownListEl.innerHTML = "";
   const dropdownOption = document.createElement("option");
   dropdownOption.value = `showAll`;
   dropdownOption.innerHTML = `Show All Episodes`;
   episodeDropdownListEl.appendChild(dropdownOption);
+  return episodeDropdownListEl;
+}
+
+//The select input should list all episodes in the format: "S01E01 - Winter is Coming"
+function episodeDropdownListOptions() {
+  const episodeDropdownListEl = episodeDropdownListInitState();
 
   allEpisodes.forEach((episode) => {
     const dropdownOption = document.createElement("option");
@@ -256,16 +261,16 @@ function episodeDropdownListOptions() {
 
 // user makes a selection, they should be taken directly to that episode in the list
 function onEpisodeSelect() {
-  const selectedCode = document.getElementById("episodesDropdownList").value;
-
+  const selectedEpisodeId = document.getElementById("episodesDropdownList").value;
   const rootElem = document.getElementById("root");
+
   let filteredEpisode = [];
-  if (selectedCode === "showAll") {
+  if (selectedEpisodeId === "showAll") {
     filteredEpisode = allEpisodes;
   } else {
     filteredEpisode = allEpisodes.filter((episode) => {
       const episodeCode = generateEpisodeCode(episode);
-      return episodeCode === selectedCode;
+      return episodeCode === selectedEpisodeId;
     });
   }
 
@@ -273,10 +278,7 @@ function onEpisodeSelect() {
   makePageForEpisodes(filteredEpisode);
 }
 
-//generate episode and tv show code
-function generateEpisodeCode(episode) {
-  return `S${formatNumber(episode.season)}E${formatNumber(episode.number)}`;
-}
+//------------------------------ EPISODES API REQUEST ----------------------
 
 function getAllEpisodesFromApi() {
   return fetch("https://api.tvmaze.com/shows/82/episodes")
@@ -287,6 +289,8 @@ function getAllEpisodesFromApi() {
       return episodes;
     });
 }
+
+//------------------------------ SHOW DROPDOWN BAR ----------------------
 
 function showDropdownListOptions() {
   const showDropdownListEl = document.getElementById("showsDropdownList");
@@ -308,20 +312,29 @@ function showDropdownListOptions() {
 // user makes a selection, they should be taken directly to that show in the list
 function onShowSelect() {
   const selectedShowId = document.getElementById("showsDropdownList").value;
-  fetch(`https://api.tvmaze.com/shows/${selectedShowId}/episodes`)
-    .then((response) => {
-      return response.json();
-    })
-    .then((episodes) => {
-      const rootElem = document.getElementById("root");
-      const searchInput = document.getElementById("search");
-      rootElem.innerHTML = "";
-      searchInput.value = "";
-      allEpisodes = episodes;
-      makePageForEpisodes(episodes);
 
-      episodeDropdownListOptions();
-    });
+  if(selectedShowId === 'showAll') {
+    const rootElem = document.getElementById("root");
+    rootElem.innerHTML = "";
+
+    makePageForShows();
+    episodeDropdownListInitState();
+  } else {
+    fetch(`https://api.tvmaze.com/shows/${selectedShowId}/episodes`)
+      .then((response) => {
+        return response.json();
+      })
+      .then((episodes) => {
+        const rootElem = document.getElementById("root");
+        const searchInput = document.getElementById("search");
+        rootElem.innerHTML = "";
+        searchInput.value = "";
+        allEpisodes = episodes;
+        makePageForEpisodes(episodes);
+
+        episodeDropdownListOptions();
+      });
+  }
 }
 
 window.onload = setup;
