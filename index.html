@@ -10,16 +10,19 @@
 
   <body>
     <header>
-      <input type="text" id="search" onkeyup="search()">
+      <select id="showsDropdownList"></select>
+      <select id="episodesDropdownList"></select>
+      <input type="text" id="search" placeholder="your search term..." onkeyup="search()">
+      <div id="counter">
+        <span id="showsAndEpisodesCounter"></span>
+      </div>
     </header>
     
     <div id="root">
     </div>
 
-    <!-- Loads a provided function called getAllEpisodes() which returns all episodes -->
     <script src="episodes.js"></script>
-
-    <!-- Loads YOUR javascript code -->
+    <script src="shows.js"></script>
     <script src="script.js"></script>
   </body>
   <footer>
